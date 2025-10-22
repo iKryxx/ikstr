@@ -44,9 +44,10 @@ ikstr ikstr_new_len(const void *init, size_t init_len) {
     int hdr_len = ikstr_hdr_size(type);
     unsigned char *flag_ptr; // Pointer to the flag;
 
-    sh = iks_malloc(hdr_len + init_len + 1);
-    if (sh == nullptr) return nullptr;
-    if (init == IKSTR_NO_INIT) init = nullptr;
+	size_t byte_size = hdr_len + init_len + 1;
+	sh = iks_malloc(byte_size);
+    if (0 == sh) return 0;
+    if (init == IKSTR_NO_INIT) init = 0;
     else if (!init) memset(sh, 0, hdr_len + init_len + 1);
 
     s = (char*)sh + hdr_len;
@@ -89,7 +90,7 @@ ikstr ikstr_empty(void) {
 }
 
 ikstr ikstr_new(const char *init) {
-    size_t len = init == nullptr ? 0 : strlen(init);
+    size_t len = 0 == init ? 0 : strlen(init);
     return ikstr_new_len(init, len);
 }
 
@@ -98,6 +99,6 @@ ikstr ikstr_dup(ikstr s) {
 }
 
 void ikstr_free(ikstr s) {
-    if (s == nullptr) return;
+    if (0 == s) return;
     iks_free((char*)s - ikstr_hdr_size(s[-1]));
 }
