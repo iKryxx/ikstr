@@ -6,6 +6,7 @@
 #define IKSTR_IKSTR_H
 #include <stddef.h>
 #include <stdint.h>
+#include <stdarg.h>
 
 #define IKSTR_PREALLOC (512 * 512)
 
@@ -202,21 +203,31 @@ IKSTR_API ikstr ikstr_dup(ikstr s);
 
 IKSTR_API void ikstr_free(ikstr s);
 
-ikstr ikstr_grow(ikstr s, size_t len);
+IKSTR_API ikstr ikstr_grow(ikstr s, size_t len);
 
-ikstr ikstr_concat_len(ikstr s, const void* t, size_t len);
+IKSTR_API ikstr ikstr_concat_len(ikstr s, const void* t, size_t len);
 
-ikstr ikstr_concat(ikstr s, const char* t);
+IKSTR_API ikstr ikstr_concat(ikstr s, const char* t);
 
-ikstr ikstr_concat_ikstr(ikstr s, ikstr t);
+IKSTR_API ikstr ikstr_concat_ikstr(ikstr s, ikstr t);
 
-ikstr ikstr_copy_len(ikstr s, const char* t, size_t len);
+IKSTR_API ikstr ikstr_copy_len(ikstr s, const char* t, size_t len);
 
-ikstr ikstr_copy(ikstr s, const char* t);
+IKSTR_API ikstr ikstr_copy(ikstr s, const char* t);
+
+IKSTR_API ikstr ikstr_concat_vfmt(ikstr s, const char* fmt, va_list ap);
+
+#ifdef __GNUC__
+IKSTR_API ikstr ikstr_concat_fmt(ikstr s, const char* fmt, ...) __attribute__((format(printf, 2, 3)));
+IKSTR_API ikstr ikstr_new_fmt(const char* fmt, ...) __attribute__((format(printf, 1, 2)));
+#else
+IKSTR_API ikstr ikstr_concat_fmt(ikstr s, const char* fmt, ...);
+IKSTR_API ikstr ikstr_new_fmt(const char* fmt, ...);
+#endif
 
 
 
 // Low level funcs
-ikstr ikstr_make_room_for(ikstr s, size_t addlen);
+IKSTR_API ikstr ikstr_make_room_for(ikstr s, size_t addlen);
 
 #endif //IKSTR_IKSTR_H

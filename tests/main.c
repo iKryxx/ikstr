@@ -7,8 +7,7 @@
 #include <stdlib.h>
 
 int main(void) {
-    ikstr s = ikstr_new("Hello");
-    ikstr_concat(s, ", World!");
+    ikstr s = ikstr_new_fmt("Sum of %d and %d is %d", 3, 3, 6);
     printf("%s\n", s);
     ikstr_free(s);
     return 0;

@@ -5,6 +5,7 @@
 #include "ikstr.h"
 #include "ikstr_alloc.h"
 #include <limits.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -147,6 +148,62 @@ ikstr ikstr_copy_len(ikstr s, const char *t, size_t len) {
 
 ikstr ikstr_copy(ikstr s, const char *t) {
     return ikstr_copy_len(s, t, strlen(t));
+}
+
+ikstr ikstr_concat_vfmt(ikstr s, const char *fmt, va_list ap) {
+    va_list ap2;
+    char static_buf[1024], *buf = static_buf;
+    size_t buf_len = strlen(fmt);
+    int bufstrlen;
+
+    // Try to use static buffer for speed
+    if (buf_len > sizeof(static_buf)) {
+        buf = (char*)iks_malloc(buf_len);
+        if (NULL == buf) return NULL ;
+    } else {
+        buf_len = sizeof(static_buf);
+    }
+
+    while (1) {
+        va_copy(ap2, ap);
+        bufstrlen = vsnprintf(buf, buf_len, fmt, ap2);
+        va_end(ap2);
+
+        if (bufstrlen < 0) {
+            if (buf != static_buf)
+                iks_free(buf);
+            return NULL;
+        }
+        if ((size_t)bufstrlen >= buf_len) {
+            if (buf != static_buf)
+                iks_free(buf);
+            buf_len = (size_t)bufstrlen + 1;
+            buf = iks_malloc(buf_len);
+            if (NULL == buf) return NULL ;
+            continue;
+        }
+        break;
+    }
+
+    char *t = ikstr_concat_len(s, buf, bufstrlen);
+    if (buf != static_buf)
+        iks_free(buf);
+    return t;
+}
+
+ikstr ikstr_concat_fmt(ikstr s, const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    s = ikstr_concat_vfmt(s, fmt, ap);
+    va_end(ap);
+    return s;
+}
+
+ikstr ikstr_new_fmt(const char *fmt, ...) {
+    va_list ap;
+    ikstr s;
+    va_start(ap, fmt);
+    s = ikstr_concat_vfmt(ikstr_empty(), fmt, ap);
 }
 
 ikstr ikstr_make_room_for(ikstr s, size_t addlen) {
