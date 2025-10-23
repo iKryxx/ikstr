@@ -1,12 +1,8 @@
 cmake_minimum_required(VERSION 3.26)
 project(ikstr C)
 
-# Use the C23 standard
-if (MSVC)
+# Use the C11 standard
 set(CMAKE_C_STANDARD 11)
-else ()
-set(CMAKE_C_STANDARD 23)
-endif ()
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
@@ -25,7 +21,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/inc)
 if (MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE /W4 /permissive-)
 else ()
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -O3)
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
 endif ()
 
 add_executable(${PROJECT_NAME}_test
@@ -38,7 +34,7 @@ target_include_directories(${PROJECT_NAME}_test PRIVATE ${CMAKE_SOURCE_DIR}/inc)
 if (MSVC)
     target_compile_options(${PROJECT_NAME}_test PRIVATE /W4 /permissive-)
 else()
-    target_compile_options(${PROJECT_NAME}_test PRIVATE -Wall -Wextra -Wpedantic -O2)
+    target_compile_options(${PROJECT_NAME}_test PRIVATE -Wall -Wextra -Wpedantic -O3)
 endif()
 
 # Set output directories
