@@ -24,7 +24,35 @@ extern char* IKSTR_NO_INIT;
  *
  * where <blui> stands for an unsigned integer with size <bytes>
  */
-#define defhdr(bytes) struct __attribute__ ((__packed__)) ikstrhdr##bytes {uint##bytes##_t len; uint##bytes##_t cap; unsigned char flags; char buf[];}
+#ifdef __GNUC__
+#define defhdr(bytes) struct __attribute__ ((__packed__)) ikstrhdr##bytes   \
+{                                                                           \
+    uint##bytes##_t len;                                                    \
+    uint##bytes##_t cap;                                                    \
+    unsigned char flags;                                                    \
+    char buf[];                                                             \
+}
+#else
+#pragma pack(push, 1)
+#define defhdr(bytes) struct ikstrhdr##bytes    \
+{                                               \
+    uint##bytes##_t len;                        \
+    uint##bytes##_t cap;                        \
+    unsigned char flags;                        \
+    char buf[];                                 \
+};
+#pragma pack(pop)
+#endif
+
+#ifdef _WIN32
+#   ifdef IKSTR_EXPORTS
+#       define IKSTR_API __declspec(dllexport)
+#   else
+#       define IKSTR_API __declspec(dllimport)
+#   endif
+#else
+#   define IKSTR_API
+#endif
 
 defhdr(8);
 defhdr(16);
@@ -164,15 +192,15 @@ static inline void ikstr_set_cap(ikstr s, size_t new_cap) {
     }
 }
 
-ikstr ikstr_new_len(const void* init, size_t init_len);
+IKSTR_API ikstr ikstr_new_len(const void* init, size_t init_len);
 
-ikstr ikstr_empty(void);
+IKSTR_API ikstr ikstr_empty(void);
 
-ikstr ikstr_new(const char *init);
+IKSTR_API ikstr ikstr_new(const char *init);
 
-ikstr ikstr_dup(ikstr s);
+IKSTR_API ikstr ikstr_dup(ikstr s);
 
-void ikstr_free(ikstr s);
+IKSTR_API void ikstr_free(ikstr s);
 
 ikstr ikstr_grow(ikstr s, size_t len);
 

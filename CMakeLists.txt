@@ -2,7 +2,11 @@ cmake_minimum_required(VERSION 3.26)
 project(ikstr C)
 
 # Use the C23 standard
+if (MSVC)
+set(CMAKE_C_STANDARD 11)
+else ()
 set(CMAKE_C_STANDARD 23)
+endif ()
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
@@ -12,6 +16,7 @@ file(GLOB_RECURSE HEADERS "${CMAKE_SOURCE_DIR}/inc/*.h")
 
 # Create library
 add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
+target_compile_definitions(${PROJECT_NAME} PRIVATE IKSTR_EXPORTS)
 
 # Include directories
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/inc)
@@ -35,3 +40,13 @@ if (MSVC)
 else()
     target_compile_options(${PROJECT_NAME}_test PRIVATE -Wall -Wextra -Wpedantic -O2)
 endif()
+
+# Set output directories
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+)
+set_target_properties(${PROJECT_NAME}_test PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
