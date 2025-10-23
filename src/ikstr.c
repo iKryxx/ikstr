@@ -204,6 +204,140 @@ ikstr ikstr_new_fmt(const char *fmt, ...) {
     ikstr s;
     va_start(ap, fmt);
     s = ikstr_concat_vfmt(ikstr_empty(), fmt, ap);
+    va_end(ap);
+    return s;
+}
+
+ikstr ikstr_trim(ikstr s, const char *char_set) {
+    char* str_end, *start_ptr, *end_ptr;
+    size_t len;
+
+    start_ptr = s;
+    end_ptr = str_end = s + ikstr_len(s) - 1;
+
+    while (start_ptr <= str_end && strchr(char_set, *start_ptr)) start_ptr++;
+    while (end_ptr > start_ptr && strchr(char_set, *end_ptr)) end_ptr--;
+
+    len = end_ptr - start_ptr + 1;
+    if (s != start_ptr) memmove(s, start_ptr, len);
+    s[len] = '\0';
+    ikstr_set_len(s, len);
+    return s;
+}
+
+void ikstr_range(ikstr s, ssize_t start, ssize_t end) {
+    size_t new_len, len = ikstr_len(s);
+
+    if (len == 0) return;
+    if (start < 0) {
+        start = (ssize_t)len + start;
+        if (start < 0) start = 0;
+    }
+    if (end < 0) {
+        end = (ssize_t)len + end;
+        if (end < 0) end = 0;
+    }
+    new_len = start > end ? 0 : end - start + 1;
+
+    if (new_len != 0) {
+        if (start >= (ssize_t)len)
+            new_len = 0;
+        else if (end >= (ssize_t)len) {
+            end = (ssize_t)len - 1;
+            new_len = end - start + 1;
+        }
+    }
+
+    if (start && new_len) memmove(s, s + start, new_len);
+    s[new_len] = '\0';
+    ikstr_set_len(s, new_len);
+}
+
+int ikstr_cmp(ikstr s1, ikstr s2) {
+    size_t l1 = ikstr_len(s1), l2 = ikstr_len(s2);
+    size_t min_len = l1 < l2 ? l1 : l2;
+    int cmp = memcmp(s1, s2, min_len);
+    if (cmp) return cmp;
+    return l1 < l2 ? -1 : l1 > l2 ? 1 : 0;
+}
+
+ikstr* ikstr_split_len(const char *s, ssize_t len, const char *sep, int sep_len, int *count) {
+    int elements = 0, slots = 5;
+    long start = 0, j;
+    ikstr *result = NULL;
+
+    if (sep_len <= 0 || len <= 0) {
+        *count = 0;
+        return NULL;
+    }
+
+    result = (ikstr*)iks_malloc(sizeof(ikstr) * slots);
+    if (NULL == result) return NULL;
+
+    for (j = 0; j < len - sep_len + 1; ++j) {
+        // Is there room for the next element and the final element?
+        if ( slots < elements + 2) {
+            ikstr *tmp;
+
+            slots *= 2;
+            tmp = (ikstr*)iks_realloc(result, sizeof(ikstr) * slots);
+            if (NULL == tmp)
+                goto cleanup;
+            result = tmp;
+        }
+        // Where is the seperator?
+        if ((sep_len == 1 && *(s+j) == sep[0]) || memcmp(s+j, sep, sep_len) == 0) {
+            result[elements] = ikstr_new_len(s + start, j - start);
+            if (result[elements] == NULL) goto cleanup;
+            ++elements;
+            start = j + sep_len;
+            j += sep_len - 1; // Skip the seperator
+        }
+
+    }
+    result[elements] = ikstr_new_len(s + start, len - start);
+    if (result[elements] == NULL) goto cleanup;
+    ++elements;
+    *count = elements;
+    return result;
+
+    cleanup:
+    {
+        for (int i = 0; i < elements; ++i) ikstr_free(result[i]);
+        iks_free(result);
+        *count = 0;
+        return NULL;
+    }
+}
+
+ikstr* ikstr_split(const char *s, const char *sep, int *count) {
+    return ikstr_split_len(s, strlen(s), sep, strlen(sep), count);
+}
+
+void ikstr_free_split_res(ikstr *tokens, int count) {
+    if (!tokens) return;
+    while (count--) ikstr_free(tokens[count]);
+    iks_free(tokens);
+}
+
+ikstr ikstr_join(int argc, char **argv, const char *sep) {
+    ikstr s = ikstr_empty();
+
+    for (int i = 0; i < argc; ++i) {
+        s = ikstr_concat(s, argv[i]);
+        if (i < argc - 1) s = ikstr_concat(s, sep);
+    }
+    return s;
+}
+
+ikstr ikstr_join_ikstr(int argc, ikstr* argv, const char *sep) {
+    ikstr s = ikstr_empty();
+
+    for (int i = 0; i < argc; ++i) {
+        s = ikstr_concat_ikstr(s, argv[i]);
+        if (i < argc - 1) s = ikstr_concat(s, sep);
+    }
+    return s;
 }
 
 ikstr ikstr_make_room_for(ikstr s, size_t addlen) {

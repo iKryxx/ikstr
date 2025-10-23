@@ -7,6 +7,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdarg.h>
+#include <unistd.h> // ssize_t TODO: Is unistd on Windows?
 
 #define IKSTR_PREALLOC (512 * 512)
 
@@ -225,6 +226,21 @@ IKSTR_API ikstr ikstr_concat_fmt(ikstr s, const char* fmt, ...);
 IKSTR_API ikstr ikstr_new_fmt(const char* fmt, ...);
 #endif
 
+IKSTR_API ikstr ikstr_trim(ikstr s, const char* char_set);
+
+IKSTR_API void ikstr_range(ikstr s, ssize_t start, ssize_t end);
+
+IKSTR_API int ikstr_cmp(ikstr s1, ikstr s2);
+
+IKSTR_API ikstr *ikstr_split_len(const char *s, ssize_t len, const char *sep, int sep_len, int *count);
+
+IKSTR_API ikstr *ikstr_split(const char *s, const char *sep, int *count);
+
+IKSTR_API void ikstr_free_split_res(ikstr *tokens, int count);
+
+IKSTR_API ikstr ikstr_join(int argc, char** argv, const char* sep);
+
+IKSTR_API ikstr ikstr_join_ikstr(int argc, ikstr *argv, const char* sep);
 
 
 // Low level funcs
