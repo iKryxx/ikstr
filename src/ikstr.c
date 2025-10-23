@@ -21,7 +21,7 @@ static inline int ikstr_hdr_size(unsigned char type) {
         case IKSTR_64:
             return sizeof(struct ikstrhdr64);
         default:
-            return 0;
+            return 0 ;
     }
 }
 
@@ -46,7 +46,7 @@ ikstr ikstr_new_len(const void *init, size_t init_len) {
 
 	size_t byte_size = hdr_len + init_len + 1;
 	sh = iks_malloc(byte_size);
-    if (0 == sh) return 0;
+    if (NULL == sh) return NULL ;
     if (init == IKSTR_NO_INIT) init = 0;
     else if (!init) memset(sh, 0, hdr_len + init_len + 1);
 
@@ -83,6 +83,7 @@ ikstr ikstr_new_len(const void *init, size_t init_len) {
     *flag_ptr = type;
     if (init_len && init) memcpy(s, init, init_len);
     s[init_len] = '\0';
+    // ReSharper disable once CppDFAMemoryLeak
     return s;
 }
 
@@ -91,7 +92,7 @@ ikstr ikstr_empty(void) {
 }
 
 ikstr ikstr_new(const char *init) {
-    size_t len = 0 == init ? 0 : strlen(init);
+    size_t len = NULL == init ? 0 : strlen(init);
     return ikstr_new_len(init, len);
 }
 
@@ -100,7 +101,7 @@ ikstr ikstr_dup(ikstr s) {
 }
 
 void ikstr_free(ikstr s) {
-    if (0 == s) return;
+    if (NULL == s) return;
     iks_free((char*)s - ikstr_hdr_size(s[-1]));
 }
 
@@ -109,7 +110,7 @@ ikstr ikstr_grow(ikstr s, size_t len) {
 
     if (len < l) return s;
     s = ikstr_make_room_for(s, len - l);
-    if (s == nullptr) return nullptr;
+    if (NULL == s) return NULL ;
     memset(s + l, 0, len - l + 1);
     ikstr_set_len(s, len);
     return s;
@@ -118,7 +119,7 @@ ikstr ikstr_grow(ikstr s, size_t len) {
 ikstr ikstr_concat_len(ikstr s, const void *t, size_t len) {
     size_t l = ikstr_len(s);
     s = ikstr_make_room_for(s, len);
-    if (s == nullptr) return nullptr;
+    if (NULL == s) return NULL ;
     memcpy(s + l, t, len);
     ikstr_set_len(s, l + len);
     s[l + len] = '\0';
@@ -136,7 +137,7 @@ ikstr ikstr_concat_ikstr(ikstr s, ikstr t) {
 ikstr ikstr_copy_len(ikstr s, const char *t, size_t len) {
     if (ikstr_cap(s) < len) {
         s = ikstr_make_room_for(s, len - ikstr_len(s));
-        if (s == nullptr) return nullptr;
+        if (NULL == s) return NULL ;
     }
     memcpy(s, t, len);
     s[len] = '\0';
@@ -171,18 +172,18 @@ ikstr ikstr_make_room_for(ikstr s, size_t addlen) {
     hdr_len = ikstr_hdr_size(type);
 
     if (hdr_len + new_len + 1 <= req_len) // size_t overflow
-        return nullptr;
+        return NULL ;
 
     if (old_type == type) {
         new_sh = iks_realloc(sh, hdr_len + new_len + 1);
         // ReSharper disable once CppDFAMemoryLeak
-        if (new_sh == nullptr) return nullptr;
+        if (NULL == new_sh) return NULL ;
         s = (char*)new_sh + hdr_len;
     }
     else {
         new_sh = iks_malloc(hdr_len + new_len + 1);
         // ReSharper disable once CppDFAMemoryLeak
-        if (new_sh == nullptr) return nullptr;
+        if (NULL == s) return NULL ;
         memcpy((char*) new_sh + hdr_len, s, len + 1);
         iks_free(sh);
 
