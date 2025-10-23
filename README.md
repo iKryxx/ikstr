@@ -13,7 +13,7 @@ A tiny C library providing a heap-allocated, length-prefixed string type with co
 ## Getting Started
 
 ### Requirements
-- C23-compatible compiler
+- C11-compatible compiler
 - CMake 3.15+ (recommended)
 
 ### Build
