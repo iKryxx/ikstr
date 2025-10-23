@@ -7,10 +7,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define IKSTR_PREALLOC (512 * 512)
+
 typedef char *ikstr;
 
 extern char* IKSTR_NO_INIT;
-
 
 /*
  * Defines the structures for the headers given the bytes
@@ -143,20 +144,20 @@ static inline size_t ikstr_cap(ikstr s) {
     return 0;
 }
 
-static inline void ikstr_set_cap(ikstr s, size_t new_len) {
+static inline void ikstr_set_cap(ikstr s, size_t new_cap) {
     unsigned char flags = s[-1]; // get Flags
     switch (flags & IKSTR_TYPE_MASK) {
         case IKSTR_8:
-            IKSTR_HDR(8,s)->len = new_len;
+            IKSTR_HDR(8,s)->cap = new_cap;
             break;
         case IKSTR_16:
-            IKSTR_HDR(16,s)->len = new_len;
+            IKSTR_HDR(16,s)->cap = new_cap;
             break;
         case IKSTR_32:
-            IKSTR_HDR(32,s)->len = new_len;
+            IKSTR_HDR(32,s)->cap = new_cap;
             break;
         case IKSTR_64:
-            IKSTR_HDR(64,s)->len = new_len;
+            IKSTR_HDR(64,s)->cap = new_cap;
             break;
         default:
             return;
@@ -172,5 +173,22 @@ ikstr ikstr_new(const char *init);
 ikstr ikstr_dup(ikstr s);
 
 void ikstr_free(ikstr s);
+
+ikstr ikstr_grow(ikstr s, size_t len);
+
+ikstr ikstr_concat_len(ikstr s, const void* t, size_t len);
+
+ikstr ikstr_concat(ikstr s, const char* t);
+
+ikstr ikstr_concat_ikstr(ikstr s, ikstr t);
+
+ikstr ikstr_copy_len(ikstr s, const char* t, size_t len);
+
+ikstr ikstr_copy(ikstr s, const char* t);
+
+
+
+// Low level funcs
+ikstr ikstr_make_room_for(ikstr s, size_t addlen);
 
 #endif //IKSTR_IKSTR_H
