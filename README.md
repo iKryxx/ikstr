@@ -16,6 +16,17 @@ A tiny C library providing a heap-allocated, length-prefixed string type with co
 - C11-compatible compiler
 - CMake 3.15+ (recommended)
 
+### Installation
+If you're using Linux, you can install `ikstr` using apt. First, you have to add my GitHub Pages as a source for apt:
+```bash
+echo "deb [trusted=yes] https://ikryxx.github.io/ikstr/debian ./" | sudo tee /etc/apt/sources.list.d/ikstr.list
+```
+after that, you will run:
+```bash
+apt clean && apt update && apt install ikstr
+```
+this will install ikstr and all its dependencies.
+
 ### Build
 To build the library manually, run the following commands (You may want to edit the CMakeLists.txt to remove the testing executable)
 ```bash 
@@ -42,7 +53,7 @@ int main(void) {
 ```
 
 ### API overview
-detailed examples can be found in `test/test.c`.
+detailed examples can be found in `test/main.c`.
 - Creation:
   - `ikstr ikstr_new(const char* init);`
   - `ikstr ikstr_new_len(const void* init, size_t len);`
