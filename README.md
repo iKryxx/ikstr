@@ -25,10 +25,19 @@ after that, you will run:
 ```bash
 apt clean && apt update && apt install ikstr
 ```
-this will install ikstr and all its dependencies.
+This will install ikstr and all its dependencies. Then you can do:
+```cmake
+#CMakeLists.txt
+cmake_minimum_required(VERSION 3.15)
+project(your_project)
+find_package(ikstr REQUIRED)
+add_executable(${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME} PUBLIC ikstr)
+```
+This will find ikstr and link it to your executable.
 
 ### Build
-To build the library manually, run the following commands (You may want to edit the CMakeLists.txt to remove the testing executable)
+Manual building is not supported officially, so issues could arise. Feel free to open a pull request if you find any. To build the library manually, run the following commands (You may want to edit the CMakeLists.txt to remove the testing executable)
 ```bash 
 cd <path/to/ikstr>
 cmake -S . -B build 
